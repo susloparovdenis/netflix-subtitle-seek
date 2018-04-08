@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        Netflix subtitle jumper
-// @description Allows you to jump to previous or next subtitle position with  hotkeys
+// @name        Netflix subtitle seek 
+// @description User script for netflix. Allows you to seek to seek to the previous/next subtitle using hotkeys.
 // @license     MIT
 // @version     1.0.0
 // @author			Denis Susloparov
-// @updateURL    https://github.com/susloparovdenis/netflix-subtitle-jumper/raw/master/netflix-subtitle-jumper.user.js
-// @downloadURL  https://github.com/susloparovdenis/netflix-subtitle-jumper/raw/master/netflix-subtitle-jumper.user.js
+// @updateURL    https://github.com/susloparovdenis/netflix-subtitle-seek/raw/master/netflix-subtitle-seek.user.js
+// @downloadURL  https://github.com/susloparovdenis/netflix-subtitle-seek/raw/master/netflix-subtitle-seek.user.js
 // @include     https://www.netflix.com/*
 // @grant       none
 // @require     https://cdn.rawgit.com/Tithen-Firion/UserScripts/7bd6406c0d264d60428cfea16248ecfb4753e5e3/libraries/xhrHijacker.js?version=1.0
@@ -27,8 +27,9 @@ function processSubtitles(xmlDoc) {
     .videoPlayer;
 
     const playerSessionId = videoPlayer
-    .getAllPlayerSessionIds()[0];
-
+    .getAllPlayerSessionIds()
+    .find(s => s.includes("watch"));
+    
     player = videoPlayer.getVideoPlayerBySessionId(playerSessionId);
 }
 
@@ -65,11 +66,13 @@ function doc_keyUp(e) {
 document.addEventListener('keyup', doc_keyUp, false);
 
 xhrHijacker(function(xhr, id, origin, args) {
+
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xhr.response,"text/xml");
     if(origin === 'load') {
+      
         const tag = xmlDoc.querySelector('tt');
-        if(tag && tag.getAttribute('xmlns')=="http://www.w3.org/2006/10/ttaf1") {
+        if(tag && tag.getAttribute('xmlns')=="http://www.w3.org/ns/ttml") {
             processSubtitles(xmlDoc);
         }
     }
